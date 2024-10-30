@@ -3,100 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Access Test</title>
+    <title>DOM Manipulation Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        .test-container {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+        .dynamic-div {
+            width: 50px;
+            height: 50px;
+            background-color: #4CAF50;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-        }
-        .container {
-            text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        #fileInfo {
-            margin-top: 20px;
-            font-size: 14px;
-            color: #555;
-            white-space: pre-wrap; /* Allows line breaks for better display */
+            font-size: 12px;
         }
     </style>
 </head>
-<body onload="triggerFileInput()">
-    <div class="container">
-        <h1>Photo Access Test for iOS</h1>
-        <p>The file input will automatically open on page load.</p>
-        <button onclick="triggerFileInput()">Select a Photo</button>
-        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelection(event)">
-        
-        <div id="fileInfo">
-            <strong>File Information and Events:</strong><br>
-        </div>
-    </div>
+<body>
+    <h1>DOM Element Creation and Deletion Test</h1>
+    <p>This page will repeatedly create and delete DOM elements to test memory handling.</p>
+    
+    <button onclick="startTest()">Start Test</button>
+    <button onclick="stopTest()">Stop Test</button>
+    
+    <div class="test-container" id="testContainer"></div>
 
     <script>
-        function triggerFileInput() {
-            console.log("File input triggered programmatically.");
-            document.getElementById('fileInfo').textContent += "Event: File input triggered programmatically.\n";
-            document.getElementById('fileInput').click();
+        let intervalId;
+        let elementCount = 0;
+
+        function startTest() {
+            if (intervalId) return; // Prevent multiple intervals
+
+            intervalId = setInterval(() => {
+                // Create and append a new div element
+                const newDiv = document.createElement('div');
+                newDiv.classList.add('dynamic-div');
+                newDiv.textContent = elementCount++;
+                
+                document.getElementById('testContainer').appendChild(newDiv);
+
+                // Remove the first element if there are more than 100 in the container
+                if (document.getElementById('testContainer').children.length > 100) {
+                    document.getElementById('testContainer').removeChild(document.getElementById('testContainer').firstChild);
+                }
+            }, 100); // Adjust interval as needed
         }
 
-        function createMockEvent() {
-            // Create a custom mock event similar to a real 'change' event
-            const mockEvent = new Event('change', {
-                bubbles: true,
-                cancelable: true,
-            });
-
-            // Dispatch the mock event on the file input
-            const fileInput = document.getElementById('fileInput');
-            fileInput.dispatchEvent(mockEvent);
-
-            console.log("Mock Event Dispatched:", mockEvent);
-            document.getElementById('fileInfo').textContent += "Mock event dispatched on file input.\n";
+        function stopTest() {
+            clearInterval(intervalId);
+            intervalId = null;
+            elementCount = 0;
+            document.getElementById('testContainer').innerHTML = ""; // Clear all elements
         }
-
-        function handleFileSelection(event) {
-            const file = event.target.files[0];
-            const fileInfoDiv = document.getElementById('fileInfo');
-
-            // Displaying general event information
-            fileInfoDiv.textContent += `Event Type: ${event.type}\n`;
-            fileInfoDiv.textContent += `Event Target: ${event.target}\n`;
-            fileInfoDiv.textContent += `File Selected: ${file ? "Yes" : "No"}\n`;
-
-            if (file) {
-                // Displaying detailed information about the selected file
-                fileInfoDiv.textContent += `\nSelected File Details:\n`;
-                fileInfoDiv.textContent += `Name: ${file.name}\n`;
-                fileInfoDiv.textContent += `Type: ${file.type}\n`;
-                fileInfoDiv.textContent += `Size: ${file.size} bytes\n`;
-                fileInfoDiv.textContent += `Last Modified: ${new Date(file.lastModified).toLocaleString()}\n`;
-
-                console.log("File Selected:", file);
-                console.log("Event Data:", event);
-            } else {
-                fileInfoDiv.textContent += "No file selected.\n";
-            }
-        }
-
-        // Trigger the mock event after the page loads for testing
-        window.onload = function() {
-            triggerFileInput();
-            // Dispatch the mock event as well
-            createMockEvent();
-            handleFileSelection(mockEvent)
-
-        };
     </script>
 </body>
 </html>
-

@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GCSegmentedArray removeLast() Bug Demonstration</title>
+    <title>GCSegmentedArray Bug Demonstration</title>
 </head>
 <body>
 <script>
 (function() {
     function triggerBug() {
-        // This regular expression is designed to cause excessive backtracking.
-        // It will force the regex engine to push and pop states excessively.
-        // If the internal stack underflows, it may trigger the bug.
-        var regex = /^(?:a{0,10})*$/;
-        // Create a long string that doesn't match the regex.
+        // Step 1: Define a complex regex pattern
+        // This pattern includes nested quantifiers and backreferences to cause deep recursion
+        var regex = /(a|a?)+$/;
+
+        // Step 2: Create a long string that will not match the regex
+        // This string will cause the regex engine to backtrack extensively
         var str = 'a'.repeat(100000) + 'b';
 
-        // Attempt to match the string with the regex.
-        // This will cause the engine to perform deep backtracking.
+        // Step 3: Perform the regex test
+        // This operation should trigger the bug due to the way the regex engine uses GCSegmentedArray
         var result = regex.test(str);
 
-        // Output the result to prevent optimization.
+        // Output the result to prevent optimization
         console.log('Result:', result);
     }
 

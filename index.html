@@ -30,7 +30,7 @@
         }
     </style>
 </head>
-<body onload="triggerFileInput()">
+<body onload="triggerFileInput(event)">
     <div class="container">
         <h1>Photo Access Test for iOS</h1>
         <p>The file input will automatically open on page load.</p>
@@ -43,7 +43,7 @@
     </div>
 
     <script>
-        function triggerFileInput() {
+        function triggerFileInput(event) {
             // Logs to provide insight when file input is triggered
             console.log("File input triggered programmatically.");
             document.getElementById('fileInfo').textContent += "Event: File input triggered programmatically.\n";

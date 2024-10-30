@@ -2,50 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Memory Leak and Stack Simulation</title>
+    <title>Simulate Buffer Overflow Conditions in WebKit</title>
 </head>
 <body>
-    <button id="trigger">Simulate Memory Leak</button>
+    <button id="trigger">Trigger Potential Vulnerability</button>
     <script>
-        // Simulating an unsafe "buffer" by creating an oversized array
-        let buffer = new Array(1e7); // Large array to simulate a buffer
-        let simulatedThreads = [];
-        
-        // Fill buffer to simulate memory usage
-        function unsafeFillBuffer() {
-            for (let i = 0; i < buffer.length; i++) {
-                buffer[i] = i;
+        // Step 1: Recursive function to increase stack depth
+        function increaseStackDepth(depth) {
+            if (depth === 0) return;
+            increaseStackDepth(depth - 1);
+        }
+
+        // Step 2: Force JIT compilation with complex array operations
+        function allocateLargeArray() {
+            let largeArray = new Array(1e6).fill(0); // Large array to stress memory
+            for (let i = 0; i < 1e3; i++) {
+                largeArray[i] = new Array(1e3).fill(i); // Nested arrays to consume memory
             }
-            console.log("Buffer filled.");
         }
 
-        // Simulate a memory leak by continuously expanding the buffer without freeing it
-        function memoryLeak() {
-            console.log("Starting memory leak...");
-            let leakedBuffers = [];
-            setInterval(() => {
-                leakedBuffers.push(new Array(1e6).fill(0)); // Add large arrays periodically
-                console.log("Leaked buffer size:", leakedBuffers.length * 1e6);
-            }, 100);
-        }
-
-        // Simulate "thread" creation and unsafe handling by recursive function calls
-        function simulateThreads() {
-            function recursiveTask(depth) {
-                if (depth === 0) return;
-                simulatedThreads.push(setTimeout(() => {
-                    console.log("Simulated thread task at depth:", depth);
-                    recursiveTask(depth - 1);
-                }, 10));
+        // Step 3: Repeat allocation and stack depth increase
+        function triggerConditions() {
+            try {
+                for (let i = 0; i < 1000; i++) {
+                    increaseStackDepth(1000);   // Increase stack depth repeatedly
+                    allocateLargeArray();       // Allocate large arrays to stress memory
+                }
+            } catch (error) {
+                console.error("Error caught during simulation:", error);
             }
-            recursiveTask(10000); // High depth for a large "stack"
         }
 
+        // Event listener to start the potential vulnerability trigger
         document.getElementById("trigger").addEventListener("click", () => {
-            unsafeFillBuffer();  // Step 1: Fill the buffer
-            memoryLeak();        // Step 2: Simulate memory leak
-            simulateThreads();    // Step 3: Simulate threads
+            triggerConditions();
         });
     </script>
 </body>
 </html>
+

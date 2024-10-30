@@ -1,46 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>gcSafeMemmove Bug Demonstration</title>
+    <title>GCIncomingRefCountedSet Bug Demonstration</title>
 </head>
 <body>
 <script>
-// Function to create a large array and perform backward copy operations
-function triggerBug() {
-    const arraySize = 1024 * 1024 * 50; // 50 million elements
-    let largeArray = new Uint32Array(arraySize);
+(function() {
+    const iterations = 20; // Number of times to repeat the test
+    const objectCount = 100000; // Number of objects to create per iteration
+    let globalArray = []; // Holds references to prevent immediate GC
 
-    // Initialize the array with some data
-    for (let i = 0; i < arraySize; i++) {
-        largeArray[i] = i;
+    function createObjects() {
+        let objects = [];
+        for (let i = 0; i < objectCount; i++) {
+            let obj = { id: i };
+            if (i > 0) {
+                // Create incoming reference
+                obj.incoming = objects[i - 1];
+            }
+            objects.push(obj);
+        }
+        return objects;
     }
 
-    // Function to perform backward memmove-like operations
-    function backwardCopy(src, dst, length) {
-        for (let i = length - 1; i >= 0; i--) {
-            dst[i] = src[i];
+    function breakReferences(objects) {
+        for (let obj of objects) {
+            // Remove incoming references
+            delete obj.incoming;
         }
     }
 
-    // Create source and destination views within the same array to simulate overlapping regions
-    let srcView = largeArray.subarray(0, arraySize - 1);
-    let dstView = largeArray.subarray(1, arraySize);
+    function runTest() {
+        for (let i = 0; i < iterations; i++) {
+            console.log(`Iteration ${i + 1} started`);
 
-    // Perform backward copy operations repeatedly to stress the engine
-    for (let i = 0; i < 10; i++) {
-        backwardCopy(srcView, dstView, srcView.length);
+            // Step 1: Create objects with incoming references
+            let objects = createObjects();
+
+            // Step 2: Break the incoming references
+            breakReferences(objects);
+
+            // Step 3: Remove external references to the objects
+            globalArray = []; // Clear global references
+            objects = null; // Allow local objects to be garbage collected
+
+            // Step 4: Perform operations to encourage garbage collection
+            heavyComputation();
+
+            // Step 5: Log memory usage
+            if (window.performance && window.performance.memory) {
+                console.log(`Memory used: ${(performance.memory.usedJSHeapSize / 1048576).toFixed(2)} MB`);
+            } else {
+                console.log('Memory usage information is not available in this browser.');
+            }
+
+            console.log(`Iteration ${i + 1} completed`);
+        }
+        console.log('Test completed.');
     }
-}
 
-// Run the test and catch any potential errors
-try {
-    triggerBug();
-    console.log('Test completed without triggering the bug.');
-} catch (e) {
-    console.error('Bug triggered:', e);
-    alert('Bug triggered: ' + e);
-}
+    function heavyComputation() {
+        // Perform operations to increase memory pressure
+        let temp = [];
+        for (let i = 0; i < 50000; i++) {
+            temp.push(new Array(1000).fill(i));
+        }
+        // Remove references to allow garbage collection
+        temp = null;
+    }
+
+    // Start the test after a short delay
+    setTimeout(runTest, 1000);
+})();
 </script>
 </body>
 </html>
-

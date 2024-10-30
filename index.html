@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GCIncomingRefCountedSet Bug Demonstration</title>
+    <title>GC Bug Demonstration</title>
 </head>
 <body>
 <script>
 (function() {
-    const iterations = 20; // Number of times to repeat the test
-    const objectCount = 100000; // Number of objects to create per iteration
-    let globalArray = []; // Holds references to prevent immediate GC
+    const iterations = 500; // Increased iterations for greater effect
+    const objectCount = 5000000; // Increased object count
+    let globalArray = [];
 
     function createObjects() {
         let objects = [];
         for (let i = 0; i < objectCount; i++) {
             let obj = { id: i };
             if (i > 0) {
-                // Create incoming reference
                 obj.incoming = objects[i - 1];
             }
             objects.push(obj);
@@ -25,48 +24,44 @@
 
     function breakReferences(objects) {
         for (let obj of objects) {
-            // Remove incoming references
             delete obj.incoming;
         }
     }
 
     function runTest() {
+        console.log('Test started.');
         for (let i = 0; i < iterations; i++) {
             console.log(`Iteration ${i + 1} started`);
 
-            // Step 1: Create objects with incoming references
+            // Create objects with incoming references
             let objects = createObjects();
 
-            // Step 2: Break the incoming references
+            // Optionally retain a reference to some objects to prevent immediate GC
+            globalArray.push(objects.slice(0, 100));
+
+            // Break the incoming references
             breakReferences(objects);
 
-            // Step 3: Remove external references to the objects
-            globalArray = []; // Clear global references
-            objects = null; // Allow local objects to be garbage collected
+            // Remove references to allow garbage collection
+            objects = null;
 
-            // Step 4: Perform operations to encourage garbage collection
-            heavyComputation();
+            // Encourage garbage collection
+            setTimeout(() => {
+                globalArray.shift(); // Remove retained references
+            }, 500);
 
-            // Step 5: Log memory usage
-            if (window.performance && window.performance.memory) {
-                console.log(`Memory used: ${(performance.memory.usedJSHeapSize / 1048576).toFixed(2)} MB`);
-            } else {
-                console.log('Memory usage information is not available in this browser.');
-            }
+            // Log memory usage after a delay
+            setTimeout(() => {
+                if (window.performance && window.performance.memory) {
+                    console.log(`Memory used: ${(performance.memory.usedJSHeapSize / 1048576).toFixed(2)} MB`);
+                } else {
+                    console.log('Memory usage information is not available in this browser.');
+                }
+            }, 100);
 
             console.log(`Iteration ${i + 1} completed`);
         }
         console.log('Test completed.');
-    }
-
-    function heavyComputation() {
-        // Perform operations to increase memory pressure
-        let temp = [];
-        for (let i = 0; i < 50000; i++) {
-            temp.push(new Array(1000).fill(i));
-        }
-        // Remove references to allow garbage collection
-        temp = null;
     }
 
     // Start the test after a short delay

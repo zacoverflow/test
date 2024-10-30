@@ -2,38 +2,34 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Simulate Buffer Overflow Conditions in WebKit</title>
+    <title>ArrayBuffer Stress Test</title>
 </head>
 <body>
     <script>
-        // Step 1: Recursive function to increase stack depth
-        function increaseStackDepth(depth) {
-            if (depth === 0) return;
-            increaseStackDepth(depth - 1);
-        }
-
-        // Step 2: Force JIT compilation with complex array operations
-        function allocateLargeArray() {
-            let largeArray = new Array(1e6).fill(0); // Large array to stress memory
-            for (let i = 0; i < 1e3; i++) {
-                largeArray[i] = new Array(1e3).fill(i); // Nested arrays to consume memory
-            }
-        }
-
-        // Step 3: Repeat allocation and stack depth increase
-        function triggerConditions() {
+        function triggerArrayBufferStress() {
             try {
-                for (let i = 0; i < 1000; i++) {
-                    increaseStackDepth(1000);   // Increase stack depth repeatedly
-                    allocateLargeArray();       // Allocate large arrays to stress memory
+                // Step 1: Create a large ArrayBuffer
+                let buffer = new ArrayBuffer(1e8); // 100 MB buffer
+                let view = new Uint8Array(buffer);
+
+                // Step 2: Fill the buffer with data
+                for (let i = 0; i < view.length; i++) {
+                    view[i] = i % 256; // Fill with repeating data pattern
                 }
+
+                // Step 3: Use copyWithin to simulate memory manipulation
+                for (let i = 0; i < 1e3; i++) {
+                    view.copyWithin(1, 0, view.length - 1); // Copy a large segment within itself
+                }
+
+                console.log("ArrayBuffer manipulation completed.");
             } catch (error) {
-                console.error("Error caught during simulation:", error);
+                console.error("Error caught during ArrayBuffer stress test:", error);
             }
         }
 
-        // Immediately trigger the conditions when the page loads
-        triggerConditions();
+        // Trigger the ArrayBuffer stress test immediately
+        triggerArrayBufferStress();
     </script>
 </body>
 </html>

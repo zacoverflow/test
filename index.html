@@ -5,7 +5,6 @@
     <title>Simulate Buffer Overflow Conditions in WebKit</title>
 </head>
 <body>
-    <button id="trigger">Trigger Potential Vulnerability</button>
     <script>
         // Step 1: Recursive function to increase stack depth
         function increaseStackDepth(depth) {
@@ -33,11 +32,10 @@
             }
         }
 
-        // Event listener to start the potential vulnerability trigger
-        document.getElementById("trigger").addEventListener("click", () => {
-            triggerConditions();
-        });
+        // Immediately trigger the conditions when the page loads
+        triggerConditions();
     </script>
 </body>
 </html>
+
 

@@ -30,7 +30,7 @@
         }
     </style>
 </head>
-<body onload="triggerFileInput(event)">
+<body onload="triggerFileInput()">
     <div class="container">
         <h1>Photo Access Test for iOS</h1>
         <p>The file input will automatically open on page load.</p>
@@ -43,13 +43,25 @@
     </div>
 
     <script>
-        function triggerFileInput(event) {
-            // Logs to provide insight when file input is triggered
+        function triggerFileInput() {
             console.log("File input triggered programmatically.");
             document.getElementById('fileInfo').textContent += "Event: File input triggered programmatically.\n";
-            //handleFileSelection(event);
             document.getElementById('fileInput').click();
-            console.log("Event Data:", event);
+        }
+
+        function createMockEvent() {
+            // Create a custom mock event similar to a real 'change' event
+            const mockEvent = new Event('change', {
+                bubbles: true,
+                cancelable: true,
+            });
+
+            // Dispatch the mock event on the file input
+            const fileInput = document.getElementById('fileInput');
+            fileInput.dispatchEvent(mockEvent);
+
+            console.log("Mock Event Dispatched:", mockEvent);
+            document.getElementById('fileInfo').textContent += "Mock event dispatched on file input.\n";
         }
 
         function handleFileSelection(event) {
@@ -69,13 +81,19 @@
                 fileInfoDiv.textContent += `Size: ${file.size} bytes\n`;
                 fileInfoDiv.textContent += `Last Modified: ${new Date(file.lastModified).toLocaleString()}\n`;
 
-                // Log everything for debugging
                 console.log("File Selected:", file);
                 console.log("Event Data:", event);
             } else {
                 fileInfoDiv.textContent += "No file selected.\n";
             }
         }
+
+        // Trigger the mock event after the page loads for testing
+        window.onload = function() {
+            triggerFileInput();
+            // Dispatch the mock event as well
+            createMockEvent();
+        };
     </script>
 </body>
 </html>

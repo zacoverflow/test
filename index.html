@@ -1,73 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOM Manipulation Test</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        .test-container {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-        .dynamic-div {
-            width: 50px;
-            height: 50px;
-            background-color: #4CAF50;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-    </style>
+    <title>gcSafeMemmove Bug Demonstration</title>
 </head>
 <body>
-    <h1>DOM Element Creation and Deletion Test</h1>
-    <p>This page will repeatedly create and delete DOM elements to test memory handling.</p>
-    
-    <button onclick="startTest()">Start Test</button>
-    <button onclick="stopTest()">Stop Test</button>
-    
-    <div class="test-container" id="testContainer"></div>
+<script>
+// Function to create a large array and perform backward copy operations
+function triggerBug() {
+    const arraySize = 1024 * 1024 * 50; // 50 million elements
+    let largeArray = new Uint32Array(arraySize);
 
-    <script>
-        let intervalId;
-        let elementCount = 0;
+    // Initialize the array with some data
+    for (let i = 0; i < arraySize; i++) {
+        largeArray[i] = i;
+    }
 
-        function startTest() {
-            if (intervalId) return; // Prevent multiple intervals
-
-            intervalId = setInterval(() => {
-                // Create and append a new div element
-                const newDiv = document.createElement('div');
-                newDiv.classList.add('dynamic-div');
-                newDiv.textContent = elementCount++;
-                
-                document.getElementById('testContainer').appendChild(newDiv);
-
-                // Remove the first element if there are more than 100 in the container
-                if (document.getElementById('testContainer').children.length > 1000) {
-                    document.getElementById('testContainer').removeChild(document.getElementById('testContainer').firstChild);
-                }
-            }, 1); // Adjust interval as needed
+    // Function to perform backward memmove-like operations
+    function backwardCopy(src, dst, length) {
+        for (let i = length - 1; i >= 0; i--) {
+            dst[i] = src[i];
         }
+    }
 
-        function stopTest() {
-            clearInterval(intervalId);
-            intervalId = null;
-            elementCount = 0;
-            document.getElementById('testContainer').innerHTML = ""; // Clear all elements
-        }
-    </script>
+    // Create source and destination views within the same array to simulate overlapping regions
+    let srcView = largeArray.subarray(0, arraySize - 1);
+    let dstView = largeArray.subarray(1, arraySize);
+
+    // Perform backward copy operations repeatedly to stress the engine
+    for (let i = 0; i < 10; i++) {
+        backwardCopy(srcView, dstView, srcView.length);
+    }
+}
+
+// Run the test and catch any potential errors
+try {
+    triggerBug();
+    console.log('Test completed without triggering the bug.');
+} catch (e) {
+    console.error('Bug triggered:', e);
+    alert('Bug triggered: ' + e);
+}
+</script>
 </body>
 </html>
+

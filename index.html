@@ -56,10 +56,10 @@
                 document.getElementById('testContainer').appendChild(newDiv);
 
                 // Remove the first element if there are more than 100 in the container
-                if (document.getElementById('testContainer').children.length > 100) {
+                if (document.getElementById('testContainer').children.length > 1000) {
                     document.getElementById('testContainer').removeChild(document.getElementById('testContainer').firstChild);
                 }
-            }, 100); // Adjust interval as needed
+            }, 10); // Adjust interval as needed
         }
 
         function stopTest() {

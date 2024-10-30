@@ -22,30 +22,56 @@
             font-size: 16px;
             cursor: pointer;
         }
+        #fileInfo {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+            white-space: pre-wrap; /* Allows line breaks for better display */
+        }
     </style>
 </head>
 <body onload="triggerFileInput()">
     <div class="container">
         <h1>Photo Access Test for iOS</h1>
-        <p>Click the button below to select a photo.</p>
+        <p>The file input will automatically open on page load.</p>
         <button onclick="triggerFileInput()">Select a Photo</button>
         <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelection(event)">
-        <p id="fileInfo"></p>
+        
+        <div id="fileInfo">
+            <strong>File Information and Events:</strong><br>
+        </div>
     </div>
 
     <script>
         function triggerFileInput() {
-            // Programmatically click the hidden file input
+            // Logs to provide insight when file input is triggered
+            console.log("File input triggered programmatically.");
+            document.getElementById('fileInfo').textContent += "Event: File input triggered programmatically.\n";
             document.getElementById('fileInput').click();
         }
 
         function handleFileSelection(event) {
             const file = event.target.files[0];
+            const fileInfoDiv = document.getElementById('fileInfo');
+
+            // Displaying general event information
+            fileInfoDiv.textContent += `Event Type: ${event.type}\n`;
+            fileInfoDiv.textContent += `Event Target: ${event.target}\n`;
+            fileInfoDiv.textContent += `File Selected: ${file ? "Yes" : "No"}\n`;
+
             if (file) {
-                document.getElementById('fileInfo').textContent = `Selected file: ${file.name}`;
-                // Additional handling or logging for testing can go here
+                // Displaying detailed information about the selected file
+                fileInfoDiv.textContent += `\nSelected File Details:\n`;
+                fileInfoDiv.textContent += `Name: ${file.name}\n`;
+                fileInfoDiv.textContent += `Type: ${file.type}\n`;
+                fileInfoDiv.textContent += `Size: ${file.size} bytes\n`;
+                fileInfoDiv.textContent += `Last Modified: ${new Date(file.lastModified).toLocaleString()}\n`;
+
+                // Log everything for debugging
+                console.log("File Selected:", file);
+                console.log("Event Data:", event);
             } else {
-                document.getElementById('fileInfo').textContent = "No file selected.";
+                fileInfoDiv.textContent += "No file selected.\n";
             }
         }
     </script>

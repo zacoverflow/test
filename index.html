@@ -2,62 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Safari Crash Demo</title>
+    <title>Memory Leak and Stack Simulation</title>
 </head>
 <body>
-    <button id="trigger">Trigger Potential Bug</button>
+    <button id="trigger">Simulate Memory Leak</button>
     <script>
-        class SegmentedArray {
-            constructor() {
-                this.segments = [[]];
-                this.top = 0;
-                this.numberOfSegments = 1;
+        // Simulating an unsafe "buffer" by creating an oversized array
+        let buffer = new Array(1e7); // Large array to simulate a buffer
+        let simulatedThreads = [];
+        
+        // Fill buffer to simulate memory usage
+        function unsafeFillBuffer() {
+            for (let i = 0; i < buffer.length; i++) {
+                buffer[i] = i;
             }
-
-            expand() {
-                if (this.top === 5) {  // Simulating segment capacity
-                    this.segments.push([]);
-                    this.numberOfSegments++;
-                    this.top = 0;
-                }
-            }
-
-            append(value) {
-                this.expand();
-                this.segments[this.numberOfSegments - 1].push(value);
-                this.top++;
-            }
-
-            clear() {
-                this.segments = [[]];
-                this.numberOfSegments = 1;
-                this.top = 0;
-            }
-
-            destructor() {
-                console.assert(this.numberOfSegments === 1, "Expected only 1 segment");
-                console.assert(this.segments.length === 1, "Expected segment size to be 1");
-                // Improper cleanup, could lead to memory issues or crashes
-                this.segments.pop();
-                this.numberOfSegments--;
-                console.assert(this.numberOfSegments === 0, "Segments not cleared properly");
-            }
+            console.log("Buffer filled.");
         }
 
-        document.getElementById('trigger').addEventListener('click', () => {
-            try {
-                let arr = new SegmentedArray();
-                for (let i = 0; i < 10000; i++) {
-                    arr.append(i);
-                    if (i % 1000 === 0) arr.clear();
-                }
-                arr.destructor(); // Call destructor in an unsafe way
-            } catch (error) {
-                console.error("Error triggered: ", error);
+        // Simulate a memory leak by continuously expanding the buffer without freeing it
+        function memoryLeak() {
+            console.log("Starting memory leak...");
+            let leakedBuffers = [];
+            setInterval(() => {
+                leakedBuffers.push(new Array(1e6).fill(0)); // Add large arrays periodically
+                console.log("Leaked buffer size:", leakedBuffers.length * 1e6);
+            }, 100);
+        }
+
+        // Simulate "thread" creation and unsafe handling by recursive function calls
+        function simulateThreads() {
+            function recursiveTask(depth) {
+                if (depth === 0) return;
+                simulatedThreads.push(setTimeout(() => {
+                    console.log("Simulated thread task at depth:", depth);
+                    recursiveTask(depth - 1);
+                }, 10));
             }
+            recursiveTask(10000); // High depth for a large "stack"
+        }
+
+        document.getElementById("trigger").addEventListener("click", () => {
+            unsafeFillBuffer();  // Step 1: Fill the buffer
+            memoryLeak();        // Step 2: Simulate memory leak
+            simulateThreads();    // Step 3: Simulate threads
         });
     </script>
 </body>
 </html>
-

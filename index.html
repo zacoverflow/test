@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Simple Webpage</title>
+    <title>Photo Access Test</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,13 +14,40 @@
             margin: 0;
             background-color: #f0f0f0;
         }
-        h1 {
-            color: #333;
+        .container {
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <h1>Welcome to My Simple Webpage!</h1>
-    <p>This is a basic webpage hosted on GitHub Pages.</p>
+    <div class="container">
+        <h1>Photo Access Test for iOS</h1>
+        <p>Click the button below to select a photo.</p>
+        <button onclick="triggerFileInput()">Select a Photo</button>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelection(event)">
+        <p id="fileInfo"></p>
+    </div>
+
+    <script>
+        function triggerFileInput() {
+            // Programmatically click the hidden file input
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileSelection(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileInfo').textContent = `Selected file: ${file.name}`;
+                // Additional handling or logging for testing can go here
+            } else {
+                document.getElementById('fileInfo').textContent = "No file selected.";
+            }
+        }
+    </script>
 </body>
 </html>

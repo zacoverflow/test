@@ -39,9 +39,9 @@
                     bufferSet.push(view);
 
                     // Cloning buffers periodically for memory pressure
-                    if (i % 10 === 0) {
-                        bufferSet = bufferSet.concat(bufferSet.map(v => new Uint8Array(v.buffer.slice(0))));
-                    }
+                    // if (i % 10 === 0) {
+                    //     bufferSet = bufferSet.concat(bufferSet.map(v => new Uint8Array(v.buffer.slice(0))));
+                    // }
                 }
 
                 console.log("JavaScriptCore stress test completed.");

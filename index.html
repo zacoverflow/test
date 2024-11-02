@@ -2,36 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ArrayBuffer Stress Test</title>
+    <title>WebKit Stress Test for ArrayBuffer</title>
 </head>
 <body>
     <script>
-        function triggerArrayBufferStress() {
+        function stressArrayBuffer() {
             try {
-                // Step 1: Create a large ArrayBuffer
-                let buffer = new ArrayBuffer(1e8); // 100 MB buffer
-                let view = new Uint8Array(buffer);
+                let buffers = [];
+                
+                // Step 1: Rapidly allocate and manipulate multiple ArrayBuffers
+                for (let i = 0; i < 100; i++) {
+                    let size = Math.floor(Math.random() * 1e7) + 1e6; // Random size from 1MB to 10MB
+                    let buffer = new ArrayBuffer(size);
+                    let view = new Uint8Array(buffer);
 
-                // Step 2: Fill the buffer with data
-                for (let i = 0; i < view.length; i++) {
-                    view[i] = i % 256; // Fill with repeating data pattern
+                    // Step 2: Fill with alternating patterns and perform data swaps
+                    for (let j = 0; j < view.length; j++) {
+                        view[j] = (j * i) % 256; // Alternate with an index-based pattern
+                    }
+
+                    // Randomly manipulate data using slicing and copying
+                    let slice = view.slice(0, view.length / 2);
+                    view.set(slice, Math.floor(view.length / 4)); // Place slice data at quarter index
+
+                    // Introduce overlapping and in-place mutations
+                    view.copyWithin(0, view.length / 2, view.length - 1);
+
+                    // Store buffers for further manipulation
+                    buffers.push(view);
+
+                    // Step 3: Clone and reassign buffers
+                    if (i % 10 === 0) {
+                        buffers = buffers.map(b => new Uint8Array(b.buffer.slice(0))); // Clone all buffers every 10 iterations
+                    }
                 }
 
-                // Step 3: Use copyWithin to simulate memory manipulation
-                for (let i = 0; i < 1e3; i++) {
-                    view.copyWithin(1, 0, view.length - 1); // Copy a large segment within itself
-                }
-
-                console.log("ArrayBuffer manipulation completed.");
+                console.log("WebKit ArrayBuffer stress test completed.");
             } catch (error) {
-                console.error("Error caught during ArrayBuffer stress test:", error);
+                console.error("Error during stress test:", error);
             }
         }
 
-        // Trigger the ArrayBuffer stress test immediately
-        triggerArrayBufferStress();
+        // Trigger the stress test
+        stressArrayBuffer();
     </script>
 </body>
 </html>
-
 

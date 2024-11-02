@@ -2,49 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>WebKit Stress Test for ArrayBuffer</title>
+    <title>JavaScriptCore Stress Test</title>
 </head>
 <body>
     <script>
-        function stressArrayBuffer() {
+        function triggerJavaScriptCoreStress() {
             try {
-                let buffers = [];
+                let bufferSet = [];
                 
-                // Step 1: Rapidly allocate and manipulate multiple ArrayBuffers
-                for (let i = 0; i < 100; i++) {
-                    let size = Math.floor(Math.random() * 1e7) + 1e6; // Random size from 1MB to 10MB
-                    let buffer = new ArrayBuffer(size);
+                // Step 1: Create numerous large ArrayBuffers and fill them with complex patterns
+                for (let i = 0; i < 500; i++) {
+                    let buffer = new ArrayBuffer(1e7); // Allocate 10MB buffer
                     let view = new Uint8Array(buffer);
-
-                    // Step 2: Fill with alternating patterns and perform data swaps
+                    
+                    // Fill with patterned data and apply nested manipulation
                     for (let j = 0; j < view.length; j++) {
-                        view[j] = (j * i) % 256; // Alternate with an index-based pattern
+                        view[j] = (j * i) % 256; // Fill with variable data patterns
                     }
 
-                    // Randomly manipulate data using slicing and copying
-                    let slice = view.slice(0, view.length / 2);
-                    view.set(slice, Math.floor(view.length / 4)); // Place slice data at quarter index
+                    // Step 2: Recursive manipulation
+                    function recursiveManipulation(view, depth) {
+                        if (depth <= 0) return;
+                        
+                        // Copy and manipulate data at different sections
+                        view.copyWithin(view.length / 2, 0, view.length / 4);
+                        view.copyWithin(0, view.length / 2, view.length / 2);
 
-                    // Introduce overlapping and in-place mutations
-                    view.copyWithin(0, view.length / 2, view.length - 1);
+                        // Recursive call with reduced depth
+                        recursiveManipulation(view.subarray(0, view.length / 2), depth - 1);
+                    }
 
-                    // Store buffers for further manipulation
-                    buffers.push(view);
+                    // Apply recursive manipulations with increasing depth
+                    recursiveManipulation(view, 5);
 
-                    // Step 3: Clone and reassign buffers
+                    // Add buffer to the set for later intensive processing
+                    bufferSet.push(view);
+
+                    // Cloning buffers periodically for memory pressure
                     if (i % 10 === 0) {
-                        buffers = buffers.map(b => new Uint8Array(b.buffer.slice(0))); // Clone all buffers every 10 iterations
+                        bufferSet = bufferSet.concat(bufferSet.map(v => new Uint8Array(v.buffer.slice(0))));
                     }
                 }
 
-                console.log("WebKit ArrayBuffer stress test completed.");
+                // Step 3: Deep transformations across multiple buffers
+                for (let k = 0; k < bufferSet.length; k++) {
+                    let view = bufferSet[k];
+                    
+                    // Repeatedly transform data with shifts and merges
+                    for (let m = 0; m < 100; m++) {
+                        view.set(new Uint8Array(view.buffer.slice(0, view.length / 2)), view.length / 4);
+                        view.copyWithin(0, view.length / 2);
+                    }
+                }
+
+                console.log("JavaScriptCore stress test completed.");
             } catch (error) {
-                console.error("Error during stress test:", error);
+                console.error("Error during JavaScriptCore stress test:", error);
             }
         }
 
-        // Trigger the stress test
-        stressArrayBuffer();
+        // Run the JavaScriptCore stress test
+        triggerJavaScriptCoreStress();
     </script>
 </body>
 </html>

@@ -33,7 +33,7 @@
                     }
 
                     // Apply recursive manipulations with increasing depth
-                    recursiveManipulation(view, 5);
+                    recursiveManipulation(view, 2);
 
                     // Add buffer to the set for later intensive processing
                     bufferSet.push(view);
@@ -43,17 +43,6 @@
                         bufferSet = bufferSet.concat(bufferSet.map(v => new Uint8Array(v.buffer.slice(0))));
                     }
                 }
-
-                // Step 3: Deep transformations across multiple buffers
-                // for (let k = 0; k < bufferSet.length; k++) {
-                //     let view = bufferSet[k];
-                    
-                //     // Repeatedly transform data with shifts and merges
-                //     for (let m = 0; m < 100; m++) {
-                //         view.set(new Uint8Array(view.buffer.slice(0, view.length / 2)), view.length / 4);
-                //         view.copyWithin(0, view.length / 2);
-                //     }
-                // }
 
                 console.log("JavaScriptCore stress test completed.");
             } catch (error) {

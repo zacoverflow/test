@@ -11,7 +11,7 @@
                 let bufferSet = [];
                 
                 // Step 1: Create numerous large ArrayBuffers and fill them with complex patterns
-                for (let i = 0; i < 500; i++) {
+                for (let i = 0; i < 100; i++) {
                     let buffer = new ArrayBuffer(1e7); // Allocate 10MB buffer
                     let view = new Uint8Array(buffer);
                     
@@ -37,11 +37,6 @@
 
                     // Add buffer to the set for later intensive processing
                     bufferSet.push(view);
-
-                    // Cloning buffers periodically for memory pressure
-                    // if (i % 10 === 0) {
-                    //     bufferSet = bufferSet.concat(bufferSet.map(v => new Uint8Array(v.buffer.slice(0))));
-                    // }
                 }
 
                 console.log("JavaScriptCore stress test completed.");

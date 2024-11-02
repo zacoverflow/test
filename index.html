@@ -2,51 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>JavaScriptCore Stress Test</title>
+    <title>JavaScriptCore Intensive ArrayBuffer Manipulation Test</title>
 </head>
 <body>
     <script>
-        function triggerJavaScriptCoreStress() {
+        function triggerIntensiveArrayBufferTest() {
             try {
-                let bufferSet = [];
-                
-                // Step 1: Create numerous large ArrayBuffers and fill them with complex patterns
-                for (let i = 0; i < 100; i++) {
-                    let buffer = new ArrayBuffer(1e7); // Allocate 10MB buffer
-                    let view = new Uint8Array(buffer);
-                    
-                    // Fill with patterned data and apply nested manipulation
-                    for (let j = 0; j < view.length; j++) {
-                        view[j] = (j * i) % 256; // Fill with variable data patterns
-                    }
+                // Step 1: Initialize a large ArrayBuffer and create TypedArray views
+                let buffer = new ArrayBuffer(5e6); // 5 MB buffer
+                let uint8View = new Uint8Array(buffer);
+                let uint16View = new Uint16Array(buffer);
+                let float32View = new Float32Array(buffer);
 
-                    // Step 2: Recursive manipulation
-                    function recursiveManipulation(view, depth) {
-                        if (depth <= 0) return;
-                        
-                        // Copy and manipulate data at different sections
-                        view.copyWithin(view.length / 2, 0, view.length / 4);
-                        view.copyWithin(0, view.length / 2, view.length / 2);
-
-                        // Recursive call with reduced depth
-                        recursiveManipulation(view.subarray(0, view.length / 2), depth - 1);
-                    }
-
-                    // Apply recursive manipulations with increasing depth
-                    recursiveManipulation(view, 2);
-
-                    // Add buffer to the set for later intensive processing
-                    bufferSet.push(view);
+                // Step 2: Fill buffer with random data for manipulation
+                for (let i = 0; i < uint8View.length; i++) {
+                    uint8View[i] = i % 256; // Patterned data to track manipulation
                 }
 
-                console.log("JavaScriptCore stress test completed.");
+                // Step 3: Apply complex, chained operations
+                for (let i = 0; i < 50; i++) {
+                    // Slice a portion of the array and then reverse it
+                    let slicedUint8 = uint8View.slice(100, 1000);
+                    slicedUint8.reverse();
+                    
+                    // Set the reversed slice back into the main buffer at a new position
+                    uint8View.set(slicedUint8, 2000);
+
+                    // Copy the modified section within the buffer to another position
+                    uint8View.copyWithin(1500, 2000, 2500);
+
+                    // Perform similar operations on other views
+                    let slicedUint16 = uint16View.slice(50, 200);
+                    slicedUint16.reverse();
+                    uint16View.set(slicedUint16, 300);
+
+                    float32View.fill(Math.PI, 100, 200); // Fill a segment with a specific pattern
+                }
+
+                // Step 4: Perform nested manipulations on larger segments
+                for (let j = 0; j < 10; j++) {
+                    uint8View.reverse(); // Reverse entire Uint8Array
+                    uint16View.reverse(); // Reverse entire Uint16Array
+
+                    let largeSlice = uint8View.slice(0, 10000); // Take a large slice
+                    largeSlice.fill(j); // Fill with an incrementing value
+                    uint8View.set(largeSlice, 50000); // Set it back in buffer
+                }
+
+                // Step 5: Additional complex operations to exhaust buffer management
+                for (let k = 0; k < 5; k++) {
+                    // Copy large segments within and across typed arrays
+                    uint8View.copyWithin(0, 100000, 200000);
+                    uint16View.set(uint8View.subarray(0, uint16View.length), 0); // Cross-set data
+                }
+
+                console.log("Intensive ArrayBuffer manipulation test completed.");
             } catch (error) {
-                console.error("Error during JavaScriptCore stress test:", error);
+                console.error("Error during intensive ArrayBuffer manipulation:", error);
             }
         }
 
-        // Run the JavaScriptCore stress test
-        triggerJavaScriptCoreStress();
+        // Run the intensive ArrayBuffer function test
+        triggerIntensiveArrayBufferTest();
     </script>
 </body>
 </html>

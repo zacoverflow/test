@@ -2,16 +2,16 @@
 <html>
 <body>
   <script>
-    function recursiveFunction() {
-      return recursiveFunction();
+    function tailRecursiveFunction(n) {
+      if (n === 0) return; // Base case
+      return tailRecursiveFunction(n - 1); // Tail call
     }
 
     try {
-      recursiveFunction();
+      tailRecursiveFunction(10000); // Attempt a high recursion depth
     } catch (e) {
-      console.error("Error caught:", e);
+      console.error("Error triggered:", e);
     }
   </script>
 </body>
 </html>
-

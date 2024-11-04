@@ -2,6 +2,7 @@
 <html>
 <body>
   <script>
+    const largeArray = new Array(1000000).fill(0);
     function tailRecursiveFunction(n) {
       if (n === 0) return; // Base case
       return tailRecursiveFunction(n - 1); // Tail call
@@ -9,6 +10,11 @@
 
     try {
       tailRecursiveFunction(10000); // Attempt a high recursion depth
+      for (let i = 0; i < largeArray.length; i++) {
+      if (largeArray[i] !== 0) {
+        console.log(`Unexpected memory data at index ${i}:`, largeArray[i]);
+      }
+    }
     } catch (e) {
       console.error("Error triggered:", e);
     }

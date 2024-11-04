@@ -1,70 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>JavaScriptCore Intensive ArrayBuffer Manipulation Test</title>
-</head>
+<html>
 <body>
-    <script>
-        function triggerIntensiveArrayBufferTest() {
-            try {
-                // Step 1: Initialize a large ArrayBuffer and create TypedArray views
-                let buffer = new ArrayBuffer(5e6); // 5 MB buffer
-                let uint8View = new Uint8Array(buffer);
-                let uint16View = new Uint16Array(buffer);
-                let float32View = new Float32Array(buffer);
+  <script>
+    function recursiveFunction() {
+      return recursiveFunction();
+    }
 
-                // Step 2: Fill buffer with random data for manipulation
-                for (let i = 0; i < uint8View.length; i++) {
-                    uint8View[i] = i % 256; // Patterned data to track manipulation
-                }
-
-                // Step 3: Apply complex, chained operations
-                for (let i = 0; i < 50; i++) {
-                    // Slice a portion of the array and then reverse it
-                    let slicedUint8 = uint8View.slice(100, 1000);
-                    slicedUint8.reverse();
-                    
-                    // Set the reversed slice back into the main buffer at a new position
-                    uint8View.set(slicedUint8, 2000);
-
-                    // Copy the modified section within the buffer to another position
-                    uint8View.copyWithin(1500, 2000, 2500);
-
-                    // Perform similar operations on other views
-                    let slicedUint16 = uint16View.slice(50, 200);
-                    slicedUint16.reverse();
-                    uint16View.set(slicedUint16, 300);
-
-                    float32View.fill(Math.PI, 100, 200); // Fill a segment with a specific pattern
-                }
-
-                // Step 4: Perform nested manipulations on larger segments
-                for (let j = 0; j < 10; j++) {
-                    uint8View.reverse(); // Reverse entire Uint8Array
-                    uint16View.reverse(); // Reverse entire Uint16Array
-
-                    let largeSlice = uint8View.slice(0, 10000); // Take a large slice
-                    largeSlice.fill(j); // Fill with an incrementing value
-                    uint8View.set(largeSlice, 50000); // Set it back in buffer
-                }
-
-                // Step 5: Additional complex operations to exhaust buffer management
-                for (let k = 0; k < 5; k++) {
-                    // Copy large segments within and across typed arrays
-                    uint8View.copyWithin(0, 100000, 200000);
-                    uint16View.set(uint8View.subarray(0, uint16View.length), 0); // Cross-set data
-                }
-
-                console.log("Intensive ArrayBuffer manipulation test completed.");
-            } catch (error) {
-                console.error("Error during intensive ArrayBuffer manipulation:", error);
-            }
-        }
-
-        // Run the intensive ArrayBuffer function test
-        triggerIntensiveArrayBufferTest();
-    </script>
+    try {
+      recursiveFunction();
+    } catch (e) {
+      console.error("Error caught:", e);
+    }
+  </script>
 </body>
 </html>
 
